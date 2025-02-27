@@ -11,7 +11,8 @@ import SwiftUI
 struct GoodEatsApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TestChatbot()
+                .environmentObject(OpenAIConnector())
         }
     }
 }
