@@ -11,7 +11,8 @@ import Combine
 class OpenAIConnector: ObservableObject {
     /// This URL might change in the future, so if you get an error, make sure to check the OpenAI API Reference.
     let openAIURL = URL(string: "https://api.openai.com/v1/chat/completions")
-    let openAIKey = "Issa secret"
+    //Whenever I push keep this a secret...
+    let openAIKey = "who knows?"
     
     /// This is what stores your messages. You can see how to use it in a SwiftUI view here:
     @Published var messageLog: [[String: String]] = [
@@ -50,12 +51,16 @@ class OpenAIConnector: ObservableObject {
                 let responseHandler = OpenAIResponseHandler()
                 if let decodedResponse = responseHandler.decodeJson(jsonString: jsonStr) {
                     let message = decodedResponse.choices.first?.message.content ?? "No response"
-                    logMessage(message, messageUserType: .assistant)
+                    await MainActor.run {
+                        logMessage(message, messageUserType: .assistant)
+                    }
                 }
             }
         } catch {
             print("Request failed: \(error.localizedDescription)")
-            logMessage("Error: \(error.localizedDescription)", messageUserType: .assistant)
+            await MainActor.run {
+                logMessage("Error: \(error.localizedDescription)", messageUserType: .assistant)
+            }
         }
     }
 }
