@@ -7,49 +7,55 @@
 
 import SwiftUI
 
+import PhotosUI
+
 struct TestChatbot: View {
-    @State var text: String = ""
     @EnvironmentObject var gpt: OpenAIConnector
-    @State var isLoading: Bool = false
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var selectedImageData: Data? = nil
+    @State private var isLoading: Bool = false
+
     var body: some View {
-        ZStack {
-            VStack {
-                ScrollView {
-                    ForEach(gpt.messageLog) { message in
-                        Text(message["content"] ?? "Error retrieving message")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(message["role"] == "user" ? .blue : .black)
-                            .cornerRadius(10)
-                            .padding(.vertical, 25)
-                    }
+        VStack {
+            ScrollView {
+                ForEach(gpt.messageLog) { message in
+                    Text(message.content)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(message.role == "user" ? .blue : .black)
+                        .cornerRadius(10)
+                        .padding(.vertical, 25)
                 }
-                HStack {
-                    TextField("Ask a Question..", text: $text)
-                    Button {
-                        guard !isLoading else { return }
-                        gpt.messageLog.append(["role": "user", "content": text])
-                        text = ""
-                        isLoading = true
-                        Task {
-                            await gpt.sendToAssistant()
+            }
+
+            PhotosPicker(selection: $selectedItem, matching: .images) {
+                Label("Select Image", systemImage: "photo")
+            }
+            .onChange(of: selectedItem) { newItem in
+                Task {
+                    // Safely unwrap `newItem` before proceeding
+                    if let item = newItem {
+                        // Load the transferable data
+                        if let data = try? await item.loadTransferable(type: Data.self) {
+                            selectedImageData = data
+                            // Log the image as base64
+                            gpt.logMessage(data, messageUserType: .user)
+                            isLoading = true
+                            await gpt.sendImageToAssistant(imageData: data)
                             isLoading = false
                         }
-                    } label: {
-                        Image(systemName: "paperplane")
                     }
-                    .disabled(isLoading)
                 }
-                .padding(25)
             }
+
+
             if isLoading {
-                Color.black.opacity(0.5)
-                    .edgesIgnoringSafeArea(.all)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .progressViewStyle(CircularProgressViewStyle())
                     .scaleEffect(2)
             }
         }
+        .padding()
     }
 }
 

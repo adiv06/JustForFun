@@ -15,25 +15,35 @@ class OpenAIConnector: ObservableObject {
     let openAIKey = "who knows?"
     
     /// This is what stores your messages. You can see how to use it in a SwiftUI view here:
-    @Published var messageLog: [[String: String]] = [
-        /// Modify this to change the personality of the assistant.
-        ["role": "system", "content": "You are a friendly assistant, please answer the questions given to you thoughtfully."]
-    ]
+    @Published var messageLog: [ChatMessage] = []
 
-    func sendToAssistant() async {
+    struct ChatMessage: Identifiable {
+        let id = UUID()
+        let role: String
+        let content: String
+    }
+
+    func sendImageToAssistant(imageData: Data) async {
         guard let url = openAIURL else {
             print("Invalid URL")
             return
         }
+        
+        let base64Image = imageData.base64EncodedString()
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(self.openAIKey)", forHTTPHeaderField: "Authorization")
         
+        // Ensure we append the base64 image properly to the messages
+        var messageLogWithImage = messageLog
+        let imageMessage = ChatMessage(role: "user", content: base64Image)
+        messageLogWithImage.append(imageMessage)
+        
         let httpBody: [String: Any] = [
             "model": "gpt-4o-mini",
-            "messages": messageLog
+            "messages": messageLogWithImage
         ]
         
         do {
@@ -43,7 +53,7 @@ class OpenAIConnector: ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                print("Error: Invalid HTTP response giving out \(response), the data contained: " + (String(data: data, encoding: .utf8) ?? "Nah"))
+                print("Error: Invalid response")
                 return
             }
             
@@ -58,11 +68,11 @@ class OpenAIConnector: ObservableObject {
             }
         } catch {
             print("Request failed: \(error.localizedDescription)")
-            await MainActor.run {
-                logMessage("Error: \(error.localizedDescription)", messageUserType: .assistant)
-            }
         }
     }
+
+    
+    
 }
 
 
@@ -82,7 +92,7 @@ extension OpenAIConnector {
             session = URLSession.shared
         }
         var requestData: Data?
-        let task = session.dataTask(with: request as URLRequest, completionHandler:{ (data: Data?, response: URLResponse?, error: Error?) -> Void in
+        let task = session.dataTask(with: request, completionHandler: { (data, response, error) in
             if error != nil {
                 print("error: \(error!.localizedDescription): \(error!.localizedDescription)")
             } else if data != nil {
@@ -105,16 +115,16 @@ extension OpenAIConnector {
 
 extension OpenAIConnector {
     /// This function makes it simpler to append items to messageLog.
+    // Update to accept either text or image data
     func logMessage(_ message: String, messageUserType: MessageUserType) {
-        var messageUserTypeString = ""
-        switch messageUserType {
-        case .user:
-            messageUserTypeString = "user"
-        case .assistant:
-            messageUserTypeString = "assistant"
-        }
-        
-        messageLog.append(["role": messageUserTypeString, "content": message])
+        let newMessage = ChatMessage(role: messageUserType == .user ? "user" : "assistant", content: message)
+        messageLog.append(newMessage)
+    }
+
+    func logMessage(_ imageData: Data, messageUserType: MessageUserType) {
+        let base64Image = imageData.base64EncodedString()
+        let newMessage = ChatMessage(role: messageUserType == .user ? "user" : "assistant", content: base64Image)
+        messageLog.append(newMessage)
     }
     
     enum MessageUserType {
