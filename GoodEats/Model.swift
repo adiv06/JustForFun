@@ -16,5 +16,6 @@ enum AppScreens {
     case loadingScreen
     case savedRecipes
     case homeView
+    case cameraView
 }
 

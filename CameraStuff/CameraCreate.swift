@@ -12,7 +12,9 @@
 
 
 struct PhotoLibraryCreate: UIViewControllerRepresentable {
-    @Binding var isPresented: Bool
+    //@Binding var isPresented: Bool
+    //An optimization would be making a state and then assinging the binding to that new state at the end so ti deosnt rerender UI every time
+    @Binding var photoList: [UIImage]
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
@@ -44,13 +46,13 @@ struct PhotoLibraryCreate: UIViewControllerRepresentable {
                     result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
                         if let image = image as? UIImage {
                             DispatchQueue.main.async {
-                                TextScan.cameraImages.append(image)
+                                self?.parent.photoList.append(image)
                             }
                         }
                     }
                 }
             }
-            parent.isPresented = false
+            //parent.isPresented = false
         }
     }
 }
@@ -58,7 +60,8 @@ struct PhotoLibraryCreate: UIViewControllerRepresentable {
  
 
 struct CameraCreate: UIViewControllerRepresentable {
-    @Binding var isPresented: Bool
+    //@Binding var isPresented: Bool
+    @Binding var photoList: [UIImage]
 
     func makeUIViewController(context: Context) -> CameraViewController {
         let cameraVC = CameraViewController()
@@ -80,11 +83,12 @@ struct CameraCreate: UIViewControllerRepresentable {
         }
         
         func didCapturePhoto(_ photo: UIImage) {
-            parent.isPresented = false
+            //parent.isPresented = false
+            parent.photoList.append(photo)
         }
 
         func didCancel() {
-            parent.isPresented = false
+            //parent.isPresented = false
         }
     }
 }
@@ -222,7 +226,7 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             return
         }
         
-        TextScan.cameraImages.append(image)
+        //TextScan.cameraImages.append(image)
 
         if let thumbnailButton = view.subviews.first(where: { $0 is UIButton && $0.frame.size == thumbnailSize }) as? UIButton {
             withAnimation{

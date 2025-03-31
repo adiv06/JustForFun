@@ -50,6 +50,11 @@
 			path = GoodEatsUITests;
 			sourceTree = "<group>";
 		};
+		7C811E902D9B450800BE37EE /* CameraStuff */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CameraStuff;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +90,7 @@
 				7C776C1C2D6FF8E60008DFF8 /* GoodEatsTests */,
 				7C776C262D6FF8E60008DFF8 /* GoodEatsUITests */,
 				7C776C092D6FF8E40008DFF8 /* Products */,
+				7C811E902D9B450800BE37EE /* CameraStuff */,
 			);
 			sourceTree = "<group>";
 		};
@@ -115,6 +121,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				7C776C0A2D6FF8E40008DFF8 /* GoodEats */,
+				7C811E902D9B450800BE37EE /* CameraStuff */,
 			);
 			name = GoodEats;
 			packageProductDependencies = (
@@ -411,7 +418,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.7;
@@ -448,7 +455,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.7;
