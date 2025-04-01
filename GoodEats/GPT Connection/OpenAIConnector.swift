@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import UIKit
 
 class OpenAIConnector: ObservableObject {
     /// This URL might change in the future, so if you get an error, make sure to check the OpenAI API Reference.
@@ -23,13 +24,13 @@ class OpenAIConnector: ObservableObject {
         let content: String
     }
 
-    func sendImageToAssistant(imageData: Data) async {
+    func sendImageToAssistant(imageData: [UIImage]) async {
         guard let url = openAIURL else {
             print("Invalid URL")
             return
         }
         
-        let base64Image = imageData.base64EncodedString()
+        //let base64Image = imageData.base64EncodedString()
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -38,8 +39,14 @@ class OpenAIConnector: ObservableObject {
         
         // Ensure we append the base64 image properly to the messages
         var messageLogWithImage = messageLog
-        let imageMessage = ChatMessage(role: "user", content: base64Image)
-        messageLogWithImage.append(imageMessage)
+        
+        for image in imageData{
+            let base64Image = image.toBase64() ?? "Could not process image"
+            let imageMessage = ChatMessage(role: "user", content: base64Image)
+            messageLogWithImage.append(imageMessage)
+            
+        }
+        
         
         let httpBody: [String: Any] = [
             "model": "gpt-4o-mini",
@@ -77,9 +84,9 @@ class OpenAIConnector: ObservableObject {
 
 
 /// Don't worry about this too much. This just gets rid of errors when using messageLog in a SwiftUI List or ForEach.
-extension Dictionary: Identifiable { public var id: UUID { UUID() } }
-extension Array: Identifiable { public var id: UUID { UUID() } }
-extension String: Identifiable { public var id: UUID { UUID() } }
+extension Dictionary: @retroactive Identifiable { public var id: UUID { UUID() } }
+extension Array: @retroactive Identifiable { public var id: UUID { UUID() } }
+extension String: @retroactive Identifiable { public var id: UUID { UUID() } }
 
 /// DO NOT TOUCH THIS. LEAVE IT ALONE.
 extension OpenAIConnector {

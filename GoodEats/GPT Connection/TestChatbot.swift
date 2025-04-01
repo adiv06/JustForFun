@@ -41,7 +41,8 @@ struct TestChatbot: View {
                             // Log the image as base64
                             gpt.logMessage(data, messageUserType: .user)
                             isLoading = true
-                            await gpt.sendImageToAssistant(imageData: data)
+                            ///Not using this chatbot rn, may have to switch back to data if its more conventient
+                            //await gpt.sendImageToAssistant(imageData: data)
                             isLoading = false
                         }
                     }

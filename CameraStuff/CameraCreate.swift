@@ -15,6 +15,7 @@ struct PhotoLibraryCreate: UIViewControllerRepresentable {
     //@Binding var isPresented: Bool
     //An optimization would be making a state and then assinging the binding to that new state at the end so ti deosnt rerender UI every time
     @Binding var photoList: [UIImage]
+    @Binding var path: [AppScreens]
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
@@ -53,6 +54,8 @@ struct PhotoLibraryCreate: UIViewControllerRepresentable {
                 }
             }
             //parent.isPresented = false
+            //May add back later
+            //parent.path.popLast()
         }
     }
 }
@@ -62,6 +65,8 @@ struct PhotoLibraryCreate: UIViewControllerRepresentable {
 struct CameraCreate: UIViewControllerRepresentable {
     //@Binding var isPresented: Bool
     @Binding var photoList: [UIImage]
+    @State var bufferList: [UIImage] = []
+    @Binding var path: [AppScreens]
 
     func makeUIViewController(context: Context) -> CameraViewController {
         let cameraVC = CameraViewController()
@@ -84,11 +89,21 @@ struct CameraCreate: UIViewControllerRepresentable {
         
         func didCapturePhoto(_ photo: UIImage) {
             //parent.isPresented = false
-            parent.photoList.append(photo)
+            parent.bufferList.append(photo)
         }
 
         func didCancel() {
             //parent.isPresented = false
+            parent.path.popLast()
+        }
+        
+        func goToLoading() {
+            //parent.isPresented = false
+            //Assigning the actual list once we have all of the pictures
+            parent.photoList = parent.bufferList
+            parent.bufferList.removeAll()
+            //Appending loading screen to supplement while api is running,l possibly with onChange on the content view
+            parent.path.append(.loadingScreen)
         }
     }
 }
@@ -96,6 +111,7 @@ struct CameraCreate: UIViewControllerRepresentable {
 protocol CameraViewControllerDelegate: AnyObject {
     func didCapturePhoto(_ photo: UIImage)
     func didCancel()
+    func goToLoading()
 }
 
 class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
@@ -117,7 +133,8 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     private func setupCameraSession() {
         captureSession = AVCaptureSession()
         captureSession.beginConfiguration()
-
+        
+        ///The Guard statements make sure it will exit early, also means i need to comment them out to work with a simulator...
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
             delegate?.didCancel()
             return
@@ -217,6 +234,8 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         /*if let capturedImage = capturedImage {
             delegate?.didCapturePhoto(capturedImage)
         }*/
+        //Go to loading now that images processed
+        delegate?.goToLoading()
         dismiss(animated: true, completion: nil)
     }
 
@@ -227,6 +246,8 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         }
         
         //TextScan.cameraImages.append(image)
+        delegate?.didCapturePhoto(image)
+        
 
         if let thumbnailButton = view.subviews.first(where: { $0 is UIButton && $0.frame.size == thumbnailSize }) as? UIButton {
             withAnimation{
